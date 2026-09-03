@@ -1466,4 +1466,280 @@ class OmniMartApp {
           </div>
 
           <!-- Status Timeline Tracker -->
-          <div class="pt-2 border-t border-slate-200 dark
+          <div class="pt-2 border-t border-slate-200 dark:border-slate-700">
+            <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold mb-1">
+              <span class="text-brand-600">Order Placed</span>
+              <span class="${['Shipped', 'Delivered'].includes(order.order_status) ? 'text-brand-600' : ''}">Shipped</span>
+              <span class="${order.order_status === 'Delivered' ? 'text-emerald-600' : ''}">Delivered</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-brand-600 h-full ${order.order_status === 'Delivered' ? 'w-full bg-emerald-500' : order.order_status === 'Shipped' ? 'w-2/3' : 'w-1/3'}"></div>
+            </div>
+          </div>
+
+          <div class="flex justify-between items-center pt-2">
+            <span class="font-bold text-slate-900 dark:text-white">Total: ${this.formatPrice(order.total_amount)}</span>
+            <button onclick="app.reprintPastInvoice('${order.id}')" class="text-brand-600 hover:underline font-bold flex items-center gap-1">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i> View Invoice
+            </button>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      list.innerHTML = '<div class="text-xs text-slate-400 py-6 text-center">You haven\'t placed any orders yet.</div>';
+    }
+
+    this.refreshIcons();
+  }
+
+  async reprintPastInvoice(orderId) {
+    const res = await this.api(`/api/orders/${orderId}`);
+    if (res.order) {
+      this.currentOrder = res.order;
+      this.printOrderReceipt();
+    }
+  }
+
+  // --- Admin Portal & Management ("All Access") ---
+  async openAdminModal() {
+    if (!this.user || this.user.role !== 'admin') {
+      // Prompt quick admin login
+      this.openAuthModal('login');
+      this.fillDemoUser('admin');
+      this.toast('Sign in with Admin credentials to access the Merchant Portal.');
+      return;
+    }
+
+    this.setAdminTab('orders');
+    this.openModal('admin-modal');
+    await this.fetchAdminStats();
+    await this.fetchAdminOrders();
+    await this.fetchAdminProducts();
+  }
+
+  setAdminTab(tab) {
+    const tabOrders = document.getElementById('admin-tab-orders');
+    const tabProducts = document.getElementById('admin-tab-products');
+    const viewOrders = document.getElementById('admin-view-orders');
+    const viewProducts = document.getElementById('admin-view-products');
+
+    if (tab === 'orders') {
+      tabOrders.className = 'text-brand-600 border-b-2 border-brand-600 pb-2 flex items-center gap-1.5 font-bold';
+      tabProducts.className = 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 pb-2 flex items-center gap-1.5 font-bold';
+      viewOrders.classList.remove('hidden');
+      viewProducts.classList.add('hidden');
+    } else {
+      tabProducts.className = 'text-brand-600 border-b-2 border-brand-600 pb-2 flex items-center gap-1.5 font-bold';
+      tabOrders.className = 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 pb-2 flex items-center gap-1.5 font-bold';
+      viewProducts.classList.remove('hidden');
+      viewOrders.classList.add('hidden');
+    }
+  }
+
+  async fetchAdminStats() {
+    const res = await this.api('/api/admin/stats');
+    if (res.total_revenue !== undefined) {
+      document.getElementById('stat-revenue').textContent = this.formatPrice(res.total_revenue);
+      document.getElementById('stat-orders').textContent = res.total_orders;
+      document.getElementById('stat-products').textContent = res.total_products;
+      document.getElementById('stat-low-stock').textContent = res.low_stock_count;
+    }
+  }
+
+  async fetchAdminOrders() {
+    const res = await this.api('/api/admin/orders');
+    const tbody = document.getElementById('admin-orders-tbody');
+    if (!tbody || !res.orders) return;
+
+    tbody.innerHTML = res.orders.map(o => `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+        <td class="p-3 font-mono font-bold">${o.order_number}</td>
+        <td class="p-3">
+          <div class="font-bold">${o.customer_name}</div>
+          <div class="text-[11px] text-slate-400">${o.customer_email}</div>
+        </td>
+        <td class="p-3 font-black">${this.formatPrice(o.total_amount)}</td>
+        <td class="p-3">
+          <span class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-[11px]">${o.payment_method}</span>
+        </td>
+        <td class="p-3">
+          <select onchange="app.updateOrderStatus('${o.id}', this.value)" class="text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 font-bold">
+            <option value="Confirmed" ${o.order_status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+            <option value="Shipped" ${o.order_status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+            <option value="Delivered" ${o.order_status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+            <option value="Cancelled" ${o.order_status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+        </td>
+        <td class="p-3">
+          <button onclick="app.reprintPastInvoice('${o.id}')" class="text-brand-600 hover:underline font-bold">Print Receipt</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async updateOrderStatus(orderId, newStatus) {
+    const res = await this.api(`/api/admin/orders/${orderId}/status`, {
+      method: 'PUT',
+      body: { status: newStatus }
+    });
+    if (res.success) {
+      this.toast(`Order ${orderId} marked as ${newStatus}!`);
+    }
+  }
+
+  async fetchAdminProducts() {
+    const tbody = document.getElementById('admin-products-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = this.products.map(p => `
+      <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+        <td class="p-3 flex items-center gap-2">
+          <img src="${p.image_url}" alt="" class="w-8 h-8 object-contain rounded bg-white p-0.5 border">
+          <span class="font-bold truncate max-w-xs">${p.title}</span>
+        </td>
+        <td class="p-3 font-semibold">${p.category}</td>
+        <td class="p-3 font-black">${this.formatPrice(p.price)}</td>
+        <td class="p-3 ${p.stock <= 10 ? 'text-amber-500 font-bold' : ''}">${p.stock}</td>
+        <td class="p-3"><span class="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">${p.badge || '—'}</span></td>
+        <td class="p-3 text-right space-x-2">
+          <button onclick="app.openEditProductModal(${p.id})" class="text-brand-600 hover:underline font-bold">Edit</button>
+          <button onclick="app.deleteProduct(${p.id})" class="text-red-500 hover:underline font-bold">Delete</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  openNewProductModal() {
+    document.getElementById('product-form-title').textContent = 'Add New Product';
+    document.getElementById('edit-prod-id').value = '';
+    document.getElementById('prod-title').value = '';
+    document.getElementById('prod-category').value = 'Electronics';
+    document.getElementById('prod-badge').value = 'New Arrival';
+    document.getElementById('prod-price').value = '99.99';
+    document.getElementById('prod-original-price').value = '129.99';
+    document.getElementById('prod-stock').value = '20';
+    document.getElementById('prod-image').value = 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800';
+    document.getElementById('prod-desc').value = 'High performance product crafted with premium materials.';
+
+    this.openModal('product-form-modal');
+  }
+
+  openEditProductModal(productId) {
+    const p = this.products.find(item => item.id === productId);
+    if (!p) return;
+
+    document.getElementById('product-form-title').textContent = 'Edit Product';
+    document.getElementById('edit-prod-id').value = p.id;
+    document.getElementById('prod-title').value = p.title;
+    document.getElementById('prod-category').value = p.category;
+    document.getElementById('prod-badge').value = p.badge || '';
+    document.getElementById('prod-price').value = p.price;
+    document.getElementById('prod-original-price').value = p.original_price;
+    document.getElementById('prod-stock').value = p.stock;
+    document.getElementById('prod-image').value = p.image_url;
+    document.getElementById('prod-desc').value = p.description;
+
+    this.openModal('product-form-modal');
+  }
+
+  async handleSaveProduct(e) {
+    e.preventDefault();
+    const id = document.getElementById('edit-prod-id').value;
+    const title = document.getElementById('prod-title').value.trim();
+    const category = document.getElementById('prod-category').value;
+    const badge = document.getElementById('prod-badge').value.trim();
+    const price = parseFloat(document.getElementById('prod-price').value);
+    const original_price = parseFloat(document.getElementById('prod-original-price').value || price);
+    const stock = parseInt(document.getElementById('prod-stock').value);
+    const image_url = document.getElementById('prod-image').value.trim();
+    const description = document.getElementById('prod-desc').value.trim();
+
+    let res;
+    if (id) {
+      res = await this.api(`/api/products/${id}`, {
+        method: 'PUT',
+        body: { title, category, badge, price, original_price, stock, image_url, description }
+      });
+    } else {
+      res = await this.api('/api/products', {
+        method: 'POST',
+        body: { title, category, badge, price, original_price, stock, image_url, description, specs: { Origin: 'Imported', Warranty: '1 Year' } }
+      });
+    }
+
+    if (res.success) {
+      this.closeModal('product-form-modal');
+      this.toast(id ? 'Product updated!' : 'New product created!');
+      await this.fetchProducts();
+      await this.fetchAdminProducts();
+      await this.fetchAdminStats();
+    } else {
+      alert(`Error saving product: ${res.error}`);
+    }
+  }
+
+  async deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product from OmniMart?')) return;
+    const res = await this.api(`/api/products/${productId}`, { method: 'DELETE' });
+    if (res.success) {
+      this.toast('Product deleted from store.');
+      await this.fetchProducts();
+      await this.fetchAdminProducts();
+      await this.fetchAdminStats();
+    }
+  }
+
+  // --- Modal Helpers ---
+  openModal(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('hidden');
+      this.refreshIcons();
+    }
+  }
+
+  closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+    if (id === 'payment-portal-modal') {
+      this.stopUpiTimer();
+    }
+  }
+
+  toast(msg) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'bg-slate-900/90 dark:bg-white/90 text-white dark:text-slate-900 px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto';
+    toast.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i> <span>${msg}</span>`;
+
+    container.appendChild(toast);
+    this.refreshIcons();
+
+    setTimeout(() => {
+      toast.classList.remove('translate-y-2', 'opacity-0');
+    }, 10);
+
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-2');
+      setTimeout(() => toast.remove(), 300);
+    }, 3200);
+  }
+
+  refreshIcons() {
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+}
+
+// Global Helper
+function jsonBody(obj) {
+  return JSON.stringify(obj);
+}
+
+// Instantiate on DOM load
+window.addEventListener('DOMContentLoaded', () => {
+  window.app = new OmniMartApp();
+});
