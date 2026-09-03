@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmniMart | Universal All-in-One E-Commerce Store</title>
+  
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              300: '#a5b4fc',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              800: '#3730a3',
+              900: '#312e81',
+              950: '#1e1b4b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-full flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white">
+
+  <!-- 1. Top Announcement Bar -->
+  <div class="bg-gradient-to-r from-brand-700 via-indigo-600 to-purple-700 text-white text-xs sm:text-sm py-2 px-4 shadow-sm">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center space-x-2">
+        <span class="bg-white/20 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider">Mega Sale</span>
+        <span>Use coupon <strong class="underline decoration-yellow-300 font-bold tracking-wider">WELCOME20</strong> for 20% OFF! Free shipping on orders over $100.</span>
+      </div>
+      <div class="flex items-center space-x-4 text-xs">
+        <span class="hidden md:inline">24/7 Dedicated Support</span>
+        <span class="hidden md:inline">•</span>
+        <button onclick="app.openAdminModal()" class="hover:underline flex items-center gap-1 font-semibold text-yellow-300">
+          <i data-lucide="shield" class="w-3.5 h-3.5"></i> Admin Portal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Main Sticky Navigation Header -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-4">
+        
+        <!-- Brand Logo -->
+        <a href="/" class="flex items-center gap-2 group flex-shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-purple-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+            <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white flex items-center">
+              Omni<span class="text-brand-600 dark:text-brand-400">Mart</span>
+            </span>
+            <span class="block text-[10px] uppercase font-semibold text-slate-400 tracking-widest -mt-1">All-in-One Store</span>
+          </div>
+        </a>
+
+        <!-- Search Bar with Live Filter -->
+        <div class="flex-1 max-w-2xl relative hidden md:block">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Search across all products (e.g., OLED TV, Parka, Serum, Espresso, Dumbbells)..." 
+              class="w-full pl-10 pr-10 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-full text-sm focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white placeholder-slate-400"
+              oninput="app.handleSearchInput(this.value)"
+            >
+            <button id="search-clear-btn" onclick="app.clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Header Action Controls -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          
+          <!-- Currency Selector -->
+          <div class="relative hidden sm:block">
+            <select id="currency-select" onchange="app.setCurrency(this.value)" class="text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 font-medium cursor-pointer focus:ring-1 focus:ring-brand-500 text-slate-700 dark:text-slate-200">
+              <option value="USD">USD ($)</option>
+              <option value="INR">INR (₹)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+            </select>
+          </div>
+
+          <!-- Theme Toggle (Dark / Light) -->
+          <button onclick="app.toggleTheme()" title="Toggle Dark/Light Mode" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
+            <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
+          </button>
+
+          <!-- Wishlist Button -->
+          <button onclick="app.openWishlistModal()" title="View Wishlist" class="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-red-500 transition-colors">
+            <i data-lucide="heart" class="w-5 h-5"></i>
+            <span id="wishlist-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+          </button>
+
+          <!-- Cart Slide-Over Trigger -->
+          <button onclick="app.openCartDrawer()" title="View Shopping Cart" class="relative p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-brand-600 transition-colors flex items-center gap-2">
+            <div class="relative">
+              <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+              <span id="cart-badge" class="hidden absolute -top-1.5 -right-2 bg-brand-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">0</span>
+            </div>
+            <span id="cart-header-subtotal" class="hidden lg:inline text-xs font-bold text-slate-900 dark:text-slate-100">$0.00</span>
+          </button>
+
+          <div class="h-6 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+
+          <!-- User Account Menu / Auth Trigger -->
+          <div id="auth-nav-container" class="flex items-center">
+            <button onclick="app.openAuthModal('login')" class="flex items-center gap-1.5 text-xs font-semibold bg-brand-600 hover:bg-brand-700 text-white px-3 py-2 rounded-lg shadow-sm shadow-brand-500/20 transition-all">
+              <i data-lucide="user" class="w-4 h-4"></i>
+              <span>Sign In</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Mobile Search Bar (under header) -->
+      <div class="pb-3 md:hidden">
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input 
+            type="text" 
+            placeholder="Search all products..." 
+            class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white"
+            oninput="app.handleSearchInput(this.value)"
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter Bar (Pills Navigation) -->
+    <div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 overflow-x-auto no-scrollbar">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center space-x-2 text-xs font-medium" id="category-pills">
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. Main Hero Banner & Promotions -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-brand-950 to-indigo-950 text-white py-12 md:py-16">
+    <div class="absolute inset-0 bg-[radial-gradient(#4f46e5_1px,transparent_1px)] [background-size:16px_16px] opacity-20 pointer-events-none"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-7 space-y-4">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/20 border border-brand-500/30 text-brand-300 text-xs font-semibold uppercase tracking-wider">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> OmniMart Universal Marketplace
+          </div>
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
+            Everything You Need, <br class="hidden sm:inline">
+            <span class="bg-gradient-to-r from-brand-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">All Under One Roof.</span>
+          </h1>
+          <p class="text-slate-300 text-sm sm:text-base max-w-xl">
+            Explore premium electronics, trending fashion, kitchen essentials, sports gear, and books. Instant checkout with multi-payment gateways and fast doorstep delivery.
+          </p>
+          <div class="pt-2 flex flex-wrap items-center gap-3">
+            <a href="#catalog-section" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-brand-600/30 flex items-center gap-2 text-sm transition-transform active:scale-95">
+              <span>Browse Catalog</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+            <div class="flex items-center gap-2 bg-white/10 hover:bg-white/15 px-3 py-2.5 rounded-xl border border-white/10 text-xs">
+              <i data-lucide="tag" class="w-4 h-4 text-yellow-400"></i>
+              <span>Coupon <strong>WELCOME20</strong> (20% OFF)</span>
+              <button onclick="app.copyCoupon('WELCOME20')" class="ml-1 text-[11px] bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded font-bold">Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 grid grid-cols-2 gap-3">
+          <div class="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+              <i data-lucide="truck" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-sm">Free Global Delivery</h4>
+            <p class="text-xs text-slate-400">Orders over $100 qualify for free express shipping.</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+              <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-sm">Payment Gateways</h4>
+            <p class="text-xs text-slate-400">Cards with 3D Secure, UPI QR code, NetBanking, COD.</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
+            <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+              <i data-lucide="repeat" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-sm">Product Compare</h4>
+            <p class="text-xs text-slate-400">Side-by-side spec comparison to find the best match.</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl space-y-2">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+              <i data-lucide="key" class="w-5 h-5"></i>
+            </div>
+            <h4 class="font-bold text-sm">Saved Credentials</h4>
+            <p class="text-xs text-slate-400">Persistent database auth, auto-login, and quick switcher.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Main Catalog Section -->
+  <main id="catalog-section" class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+      
+      <!-- Left Sidebar: Filters -->
+      <aside class="lg:col-span-1 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-6">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 class="font-bold text-base flex items-center gap-2">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4 text-brand-600"></i> Filters
+          </h3>
+          <button onclick="app.resetFilters()" class="text-xs text-brand-600 hover:underline font-medium">Reset All</button>
+        </div>
+
+        <!-- Categories List -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">Category</label>
+          <div class="space-y-1.5" id="category-filter-list">
+          </div>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div>
+          <div class="flex justify-between items-center text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            <span>Max Price</span>
+            <span id="price-range-val" class="text-brand-600 font-extrabold text-sm">$2,500</span>
+          </div>
+          <input 
+            type="range" 
+            id="price-range" 
+            min="20" 
+            max="2500" 
+            step="20" 
+            value="2500" 
+            class="w-full accent-brand-600 cursor-pointer"
+            oninput="app.handlePriceFilter(this.value)"
+          >
+          <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+            <span>$20</span>
+            <span>$2,500</span>
+          </div>
+        </div>
+
+        <!-- Minimum Star Rating -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2.5">Customer Rating</label>
+          <div class="space-y-1 text-xs">
+            <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="rating-filter" value="0" checked onchange="app.handleRatingFilter(0)" class="accent-brand-600">
+              <span>All Ratings</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="rating-filter" value="4.8" onchange="app.handleRatingFilter(4.8)" class="accent-brand-600">
+              <span class="flex items-center text-amber-500">★★★★★ <span class="text-slate-600 dark:text-slate-300 ml-1.5">4.8 & above</span></span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer p-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="rating-filter" value="4.5" onchange="app.handleRatingFilter(4.5)" class="accent-brand-600">
+              <span class="flex items-center text-amber-500">★★★★☆ <span class="text-slate-600 dark:text-slate-300 ml-1.5">4.5 & above</span></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Availability Toggle -->
+        <div>
+          <label class="flex items-center gap-2.5 cursor-pointer text-xs font-medium">
+            <input type="checkbox" id="stock-filter" onchange="app.handleStockFilter(this.checked)" class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+            <span>In Stock Only</span>
+          </label>
+        </div>
+
+        <!-- Promo Banner in Sidebar -->
+        <div class="bg-gradient-to-br from-brand-600 to-indigo-700 text-white p-4 rounded-xl text-center space-y-2">
+          <div class="text-xs font-semibold opacity-80">Special Offer</div>
+          <div class="font-extrabold text-sm">Need $50 off?</div>
+          <p class="text-[11px] opacity-90">Apply coupon <span class="bg-white/20 px-1.5 py-0.5 rounded font-mono font-bold">MEGA50</span> at checkout!</p>
+          <button onclick="app.copyCoupon('MEGA50')" class="w-full bg-white text-brand-700 hover:bg-slate-100 text-xs font-bold py-1.5 rounded-lg">Copy Code</button>
+        </div>
+
+      </aside>
+
+      <!-- Right Main Content: Products Grid & Controls -->
+      <section class="lg:col-span-3 space-y-6">
+        
+        <!-- Controls Bar -->
+        <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center space-x-2">
+            <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Showing <span id="product-count-display" class="font-bold text-brand-600">0</span> products
+            </span>
+            <span id="active-category-indicator" class="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-full font-medium">
+              All Categories
+            </span>
+          </div>
+
+          <div class="flex items-center space-x-3 text-xs">
+            <label for="sort-select" class="font-semibold text-slate-500">Sort by:</label>
+            <select id="sort-select" onchange="app.handleSortChange(this.value)" class="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 font-medium cursor-pointer focus:ring-1 focus:ring-brand-500 text-slate-700 dark:text-slate-200">
+              <option value="featured">Featured / Best Match</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="rating">Highest Rated</option>
+              <option value="popular">Most Popular</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Product Cards Grid -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        </div>
+
+        <!-- Empty State -->
+        <div id="no-products-view" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8">
+          <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="package-search" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">No products found</h3>
+          <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">We couldn't find any products matching your current filters or search criteria.</p>
+          <button onclick="app.resetFilters()" class="mt-4 bg-brand-600 text-white px-4 py-2 rounded-xl text-xs font-semibold hover:bg-brand-700">Clear All Filters</button>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 5. Floating Product Comparison Drawer -->
+  <div id="compare-floating-bar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-30 bg-slate-900/95 text-white backdrop-blur-md px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 animate-bounce-short">
+    <div class="flex items-center gap-2">
+      <i data-lucide="repeat" class="w-4 h-4 text-brand-400"></i>
+      <span class="text-xs font-medium"><strong id="compare-count">0</strong> products selected to compare</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="app.openCompareModal()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+        Compare Now
+      </button>
+      <button onclick="app.clearComparison()" class="text-slate-400 hover:text-white text-xs p-1">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal 1: Product Detail & Specs Modal -->
+  <div id="product-detail-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('product-detail-modal')" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2">
+        <div class="relative bg-slate-100 dark:bg-slate-800 p-6 flex items-center justify-center">
+          <img id="detail-img" src="" alt="" class="max-h-80 w-auto object-contain rounded-xl">
+          <span id="detail-badge" class="absolute top-4 left-4 bg-brand-600 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"></span>
+        </div>
+        <div class="p-6 md:p-8 space-y-4 flex flex-col justify-between">
+          <div class="space-y-2">
+            <span id="detail-category" class="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400"></span>
+            <h2 id="detail-title" class="text-xl font-bold text-slate-900 dark:text-white leading-snug"></h2>
+            
+            <div class="flex items-center space-x-2 text-xs">
+              <div class="flex text-amber-400">★★★★★</div>
+              <span id="detail-rating" class="font-bold text-slate-700 dark:text-slate-200"></span>
+              <span class="text-slate-400">•</span>
+              <span id="detail-reviews" class="text-slate-500"></span>
+            </div>
+
+            <div class="flex items-baseline space-x-3 pt-2">
+              <span id="detail-price" class="text-2xl font-black text-brand-600 dark:text-brand-400"></span>
+              <span id="detail-original-price" class="text-sm text-slate-400 line-through"></span>
+            </div>
+
+            <p id="detail-description" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed pt-1"></p>
+
+            <!-- Specifications Table -->
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Specifications</h4>
+              <dl id="detail-specs" class="grid grid-cols-2 gap-x-2 gap-y-1.5 text-xs"></dl>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span id="detail-stock-indicator" class="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> In Stock
+              </span>
+              <div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                <button onclick="app.adjustDetailQty(-1)" class="px-2.5 py-1 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100">-</button>
+                <span id="detail-qty-val" class="px-3 py-1 font-bold text-xs">1</span>
+                <button onclick="app.adjustDetailQty(1)" class="px-2.5 py-1 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100">+</button>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button id="detail-add-cart-btn" onclick="app.addDetailToCart()" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-brand-600/20">
+                <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
+              </button>
+              <button id="detail-wishlist-btn" onclick="app.toggleDetailWishlist()" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 hover:text-red-500">
+                <i data-lucide="heart" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Product Comparison Matrix Modal -->
+  <div id="compare-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('compare-modal')" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="mb-6">
+        <h3 class="text-xl font-bold flex items-center gap-2">
+          <i data-lucide="repeat" class="w-5 h-5 text-brand-600"></i> Side-by-Side Product Comparison
+        </h3>
+        <p class="text-xs text-slate-500">Analyze features, pricing, ratings, and technical specifications side-by-side.</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-xs text-left border-collapse" id="compare-table">
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-Over Drawer: Shopping Cart -->
+  <div id="cart-drawer-overlay" onclick="app.closeCartDrawer()" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs transition-opacity"></div>
+  <aside id="cart-drawer" class="fixed top-0 right-0 z-50 h-full w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 transform translate-x-full transition-transform duration-300 flex flex-col">
+    
+    <!-- Drawer Header -->
+    <div class="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <i data-lucide="shopping-bag" class="w-5 h-5 text-brand-600"></i>
+        <h3 class="font-bold text-base">Your Cart</h3>
+        <span id="cart-count-badge" class="bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 text-xs font-bold px-2 py-0.5 rounded-full">0 items</span>
+      </div>
+      <button onclick="app.closeCartDrawer()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <!-- Drawer Items List -->
+    <div id="cart-items-container" class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+    </div>
+
+    <!-- Drawer Footer (Order Summary & Checkout Button) -->
+    <div class="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-4">
+      <!-- Coupon Code Input -->
+      <div class="flex gap-2">
+        <input 
+          type="text" 
+          id="cart-coupon-input" 
+          placeholder="Promo code (WELCOME20, MEGA50)" 
+          class="flex-1 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs uppercase focus:ring-1 focus:ring-brand-500"
+        >
+        <button onclick="app.applyCoupon()" class="bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold">Apply</button>
+      </div>
+      <div id="coupon-feedback" class="text-xs hidden"></div>
+
+      <!-- Financial Breakdown -->
+      <div class="space-y-1.5 text-xs">
+        <div class="flex justify-between text-slate-500">
+          <span>Subtotal</span>
+          <span id="cart-subtotal" class="font-semibold text-slate-800 dark:text-slate-200">$0.00</span>
+        </div>
+        <div id="cart-discount-row" class="hidden flex justify-between text-emerald-600 dark:text-emerald-400 font-medium">
+          <span id="cart-discount-label">Discount</span>
+          <span id="cart-discount">-$0.00</span>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>Estimated Shipping</span>
+          <span id="cart-shipping" class="font-semibold text-slate-800 dark:text-slate-200">$0.00</span>
+        </div>
+        <div class="flex justify-between text-slate-500">
+          <span>Estimated Tax (8%)</span>
+          <span id="cart-tax" class="font-semibold text-slate-800 dark:text-slate-200">$0.00</span>
+        </div>
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between items-baseline">
+          <span class="text-sm font-bold">Grand Total</span>
+          <span id="cart-grand-total" class="text-lg font-black text-brand-600 dark:text-brand-400">$0.00</span>
+        </div>
+      </div>
+
+      <!-- Checkout Action Button -->
+      <button 
+        id="proceed-checkout-btn" 
+        onclick="app.openPaymentPortal()" 
+        class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-600/30 transition-all"
+      >
+        <i data-lucide="lock" class="w-4 h-4"></i>
+        <span>Proceed to Secure Checkout</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- Modal 3: Interactive Payment Portal & Checkout Gateway -->
+  <div id="payment-portal-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('payment-portal-modal')" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Portal Header with Multi-Step Indicators -->
+      <div class="bg-slate-50 dark:bg-slate-800/50 p-6 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center justify-between max-w-md mx-auto">
+          
+          <div class="flex items-center space-x-2" id="step-node-1">
+            <span class="w-7 h-7 rounded-full bg-brand-600 text-white font-bold text-xs flex items-center justify-center">1</span>
+            <span class="text-xs font-semibold">Shipping</span>
+          </div>
+          <div class="h-0.5 w-12 bg-slate-300 dark:bg-slate-700" id="step-line-1"></div>
+          
+          <div class="flex items-center space-x-2" id="step-node-2">
+            <span class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center">2</span>
+            <span class="text-xs font-semibold">Payment</span>
+          </div>
+          <div class="h-0.5 w-12 bg-slate-300 dark:bg-slate-700" id="step-line-2"></div>
+
+          <div class="flex items-center space-x-2" id="step-node-3">
+            <span class="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold text-xs flex items-center justify-center">3</span>
+            <span class="text-xs font-semibold">Confirm</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Step 1: Shipping Details View -->
+      <div id="checkout-step-1" class="p-6 sm:p-8 space-y-4">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="map-pin" class="w-4 h-4 text-brand-600"></i> Shipping Address & Contact
+        </h3>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <div>
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Full Name</label>
+            <input type="text" id="ship-name" placeholder="John Doe" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Email Address</label>
+            <input type="email" id="ship-email" placeholder="john@example.com" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-brand-500">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Street Address</label>
+            <input type="text" id="ship-address" placeholder="742 Evergreen Terrace, Springfield, OR 97477" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Phone Number</label>
+            <input type="tel" id="ship-phone" placeholder="+1 (555) 234-5678" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Delivery Preference</label>
+            <select id="ship-speed" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-brand-500">
+              <option value="standard">Standard Tracked Delivery (2-4 Days)</option>
+              <option value="express">Express Priority Delivery (1-2 Days)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end">
+          <button onclick="app.goToPaymentStep(2)" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs flex items-center gap-2">
+            <span>Continue to Payment</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Payment Portal Methods -->
+      <div id="checkout-step-2" class="hidden p-6 sm:p-8 space-y-6">
+        
+        <!-- Payment Gateway Tabs -->
+        <div class="flex border-b border-slate-200 dark:border-slate-800 space-x-4 text-xs font-bold overflow-x-auto pb-2">
+          <button onclick="app.setPaymentMethodTab('card')" id="pay-tab-card" class="text-brand-600 border-b-2 border-brand-600 pb-1 flex items-center gap-1.5 whitespace-nowrap">
+            <i data-lucide="credit-card" class="w-4 h-4"></i> Credit / Debit Card
+          </button>
+          <button onclick="app.setPaymentMethodTab('upi')" id="pay-tab-upi" class="text-slate-500 hover:text-slate-900 dark:hover:text-white pb-1 flex items-center gap-1.5 whitespace-nowrap">
+            <i data-lucide="qr-code" class="w-4 h-4"></i> Instant UPI / QR
+          </button>
+          <button onclick="app.setPaymentMethodTab('netbanking')" id="pay-tab-netbanking" class="text-slate-500 hover:text-slate-900 dark:hover:text-white pb-1 flex items-center gap-1.5 whitespace-nowrap">
+            <i data-lucide="landmark" class="w-4 h-4"></i> Net Banking
+          </button>
+          <button onclick="app.setPaymentMethodTab('cod')" id="pay-tab-cod" class="text-slate-500 hover:text-slate-900 dark:hover:text-white pb-1 flex items-center gap-1.5 whitespace-nowrap">
+            <i data-lucide="banknote" class="w-4 h-4"></i> Cash on Delivery
+          </button>
+        </div>
+
+        <!-- 1. Credit / Debit Card Tab View -->
+        <div id="pay-view-card" class="space-y-4">
+          
+          <!-- 3D Card Animation Preview -->
+          <div class="card-perspective max-w-sm mx-auto">
+            <div id="interactive-credit-card" class="credit-card-inner">
+              
+              <!-- Card Front -->
+              <div class="card-front bg-gradient-to-tr from-slate-900 via-indigo-950 to-brand-900 text-white p-5 flex flex-col justify-between shadow-xl border border-white/10">
+                <div class="flex justify-between items-center">
+                  <div class="w-10 h-7 bg-amber-400 rounded flex items-center justify-center opacity-90 shadow">
+                    <div class="w-7 h-4 border border-amber-600/60 rounded-xs"></div>
+                  </div>
+                  <span id="card-network-logo" class="font-black text-sm tracking-widest uppercase text-white/90">VISA</span>
+                </div>
+                <div class="space-y-1">
+                  <div class="text-[10px] text-white/50 tracking-widest">CARD NUMBER</div>
+                  <div id="card-preview-number" class="font-mono text-base tracking-widest font-bold">•••• •••• •••• ••••</div>
+                </div>
+                <div class="flex justify-between items-end">
+                  <div>
+                    <div class="text-[9px] text-white/50 uppercase">Card Holder</div>
+                    <div id="card-preview-name" class="font-bold text-xs uppercase tracking-wider">JOHN DOE</div>
+                  </div>
+                  <div>
+                    <div class="text-[9px] text-white/50 uppercase">Expires</div>
+                    <div id="card-preview-exp" class="font-mono font-bold text-xs">12/28</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Back -->
+              <div class="card-back bg-gradient-to-tr from-slate-900 to-slate-800 text-white p-5 flex flex-col justify-between shadow-xl border border-white/10">
+                <div class="w-full h-8 bg-slate-950 -mx-5 mt-2"></div>
+                <div class="space-y-1">
+                  <div class="text-[9px] text-white/50 text-right">CVV / CVC</div>
+                  <div class="bg-white text-slate-900 font-mono font-bold text-right px-3 py-1 rounded text-xs" id="card-preview-cvv">
+                    •••
+                  </div>
+                </div>
+                <div class="text-[9px] text-white/40 text-center">OmniMart Secure PCI-DSS 256-Bit Encrypted</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Autofill Test Card Button -->
+          <div class="text-center">
+            <button onclick="app.autofillTestCard()" class="text-xs text-brand-600 hover:text-brand-500 font-semibold bg-brand-50 dark:bg-brand-950/60 px-3 py-1 rounded-full border border-brand-200 dark:border-brand-800">
+              ⚡ 1-Click Autofill Test Card (Visa 4242)
+            </button>
+          </div>
+
+          <!-- Card Form Inputs -->
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Card Number</label>
+              <input 
+                type="text" 
+                id="input-card-number" 
+                maxlength="19" 
+                placeholder="4242 •••• •••• 4242" 
+                oninput="app.handleCardNumberInput(this)" 
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-1 focus:ring-brand-500"
+              >
+            </div>
+            <div>
+              <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Cardholder Name</label>
+              <input 
+                type="text" 
+                id="input-card-name" 
+                placeholder="JOHN DOE" 
+                oninput="app.handleCardNameInput(this)" 
+                class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl uppercase focus:ring-1 focus:ring-brand-500"
+              >
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Expiry (MM/YY)</label>
+                <input 
+                  type="text" 
+                  id="input-card-exp" 
+                  maxlength="5" 
+                  placeholder="12/28" 
+                  oninput="app.handleCardExpInput(this)" 
+                  class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-1 focus:ring-brand-500"
+                >
+              </div>
+              <div>
+                <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">CVV (3 Digits)</label>
+                <input 
+                  type="password" 
+                  id="input-card-cvv" 
+                  maxlength="4" 
+                  placeholder="•••" 
+                  onfocus="app.flipCreditCard(true)" 
+                  onblur="app.flipCreditCard(false)" 
+                  oninput="app.handleCardCvvInput(this)" 
+                  class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl font-mono focus:ring-1 focus:ring-brand-500"
+                >
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 2. UPI / QR Code View -->
+        <div id="pay-view-upi" class="hidden space-y-4 text-center">
+          <div class="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 inline-block mx-auto">
+            <div class="w-44 h-44 bg-white p-3 rounded-xl shadow mx-auto flex flex-col items-center justify-center">
+              <svg viewBox="0 0 100 100" class="w-full h-full text-slate-900 fill-current">
+                <rect x="0" y="0" width="30" height="30" rx="3" />
+                <rect x="5" y="5" width="20" height="20" fill="white" />
+                <rect x="10" y="10" width="10" height="10" />
+                
+                <rect x="70" y="0" width="30" height="30" rx="3" />
+                <rect x="75" y="5" width="20" height="20" fill="white" />
+                <rect x="80" y="10" width="10" height="10" />
+
+                <rect x="0" y="70" width="30" height="30" rx="3" />
+                <rect x="5" y="75" width="20" height="20" fill="white" />
+                <rect x="10" y="80" width="10" height="10" />
+
+                <rect x="40" y="10" width="10" height="10" />
+                <rect x="40" y="30" width="20" height="10" />
+                <rect x="10" y="40" width="10" height="20" />
+                <rect x="40" y="50" width="10" height="30" />
+                <rect x="60" y="60" width="30" height="10" />
+                <rect x="70" y="80" width="20" height="10" />
+                <rect x="55" y="45" width="10" height="10" />
+              </svg>
+            </div>
+            <div class="mt-2 text-[11px] font-semibold text-slate-500">Scan using Google Pay, PhonePe, Paytm, or UPI</div>
+          </div>
+
+          <div class="text-xs text-amber-600 dark:text-amber-400 font-bold">
+            QR code expires in: <span id="upi-countdown" class="font-mono">04:59</span>
+          </div>
+
+          <div class="max-w-xs mx-auto space-y-2">
+            <span class="text-xs text-slate-400 block font-medium">Or enter your UPI ID:</span>
+            <div class="flex gap-2">
+              <input type="text" id="upi-id-input" placeholder="username@okhdfcbank" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs">
+              <button onclick="app.verifyUpiId()" class="bg-brand-600 text-white px-3 py-2 rounded-xl text-xs font-bold">Verify</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Net Banking View -->
+        <div id="pay-view-netbanking" class="hidden space-y-3">
+          <label class="block text-xs font-semibold text-slate-500">Select Your Bank</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 cursor-pointer">
+              <input type="radio" name="bank-choice" value="Chase" checked class="accent-brand-600">
+              <span class="font-bold">Chase Bank</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 cursor-pointer">
+              <input type="radio" name="bank-choice" value="HDFC" class="accent-brand-600">
+              <span class="font-bold">HDFC Bank</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 cursor-pointer">
+              <input type="radio" name="bank-choice" value="Wells Fargo" class="accent-brand-600">
+              <span class="font-bold">Wells Fargo</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 cursor-pointer">
+              <input type="radio" name="bank-choice" value="ICICI" class="accent-brand-600">
+              <span class="font-bold">ICICI Bank</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 cursor-pointer">
+              <input type="radio" name="bank-choice" value="Barclays" class="accent-brand-600">
+              <span class="font-bold">Barclays</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 cursor-pointer">
+              <input type="radio" name="bank-choice" value="State Bank" class="accent-brand-600">
+              <span class="font-bold">State Bank (SBI)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 4. Cash on Delivery (COD) View -->
+        <div id="pay-view-cod" class="hidden space-y-3">
+          <div class="bg-amber-50 dark:bg-amber-950/40 p-4 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-200 space-y-1">
+            <h4 class="font-bold flex items-center gap-1.5">
+              <i data-lucide="alert-circle" class="w-4 h-4"></i> Cash on Delivery Terms
+            </h4>
+            <p>Pay cash or via mobile scanner upon doorstep delivery. An extra verification captcha is required below.</p>
+          </div>
+          <div class="flex items-center gap-3 pt-2">
+            <div id="cod-captcha-display" class="bg-slate-200 dark:bg-slate-700 px-4 py-2 rounded-xl font-mono text-base font-black tracking-widest select-none">
+              8492
+            </div>
+            <input type="text" id="cod-captcha-input" placeholder="Type Captcha" class="w-32 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono">
+            <button onclick="app.refreshCodCaptcha()" class="text-slate-400 hover:text-slate-600"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+
+        <!-- Payment Actions -->
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <button onclick="app.goToPaymentStep(1)" class="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-white font-semibold">
+            ← Back to Shipping
+          </button>
+          <button onclick="app.executePayment()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-3 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/30">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Authorize & Pay <span id="pay-btn-amount">$0.00</span></span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Step 3: Interactive Payment Processing Simulator -->
+      <div id="checkout-step-3" class="hidden p-12 text-center space-y-6">
+        <div class="w-20 h-20 rounded-full border-4 border-brand-200 border-t-brand-600 animate-spin mx-auto"></div>
+        <div class="space-y-2">
+          <h3 class="text-lg font-black text-slate-900 dark:text-white" id="payment-process-status">Encrypting Transaction...</h3>
+          <p class="text-xs text-slate-500" id="payment-process-sub">Verifying with card issuer & running 3D-Secure 2.0 fraud checks...</p>
+        </div>
+        <div class="w-48 bg-slate-200 dark:bg-slate-800 h-2 rounded-full mx-auto overflow-hidden">
+          <div id="payment-progress-bar" class="bg-brand-600 h-full w-1/4 transition-all duration-500"></div>
+        </div>
+      </div>
+
+      <!-- Step 4: Order Confirmation & Receipt -->
+      <div id="checkout-step-4" class="hidden p-6 sm:p-8 space-y-6">
+        <div class="text-center space-y-2">
+          <div class="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+            <i data-lucide="check" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-xl font-black text-slate-900 dark:text-white">Payment Confirmed!</h3>
+          <p class="text-xs text-slate-500">Your order has been authorized and dispatched to fulfillment.</p>
+        </div>
+
+        <!-- Order Summary Card -->
+        <div class="bg-slate-50 dark:bg-slate-800/60 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3 text-xs">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pb-3 border-b border-slate-200 dark:border-slate-700">
+            <div>
+              <span class="text-slate-400 block">Order Number</span>
+              <span id="confirm-order-no" class="font-mono font-bold text-slate-900 dark:text-white text-sm"></span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">Tracking ID</span>
+              <span id="confirm-track-no" class="font-mono font-bold text-brand-600 text-sm"></span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">Payment Method</span>
+              <span id="confirm-method" class="font-bold text-slate-900 dark:text-white"></span>
+            </div>
+            <div>
+              <span class="text-slate-400 block">Estimated Arrival</span>
+              <span id="confirm-date" class="font-bold text-emerald-600 dark:text-emerald-400"></span>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-slate-400 block mb-1">Delivering To:</span>
+            <div id="confirm-address" class="font-medium text-slate-700 dark:text-slate-300"></div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-3 justify-center pt-2">
+          <button onclick="app.printOrderReceipt()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Print / Save PDF Receipt</span>
+          </button>
+          <button onclick="app.closeModal('payment-portal-modal'); app.openProfileModal();" class="bg-brand-600 hover:bg-brand-500 text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow">
+            <i data-lucide="package" class="w-4 h-4"></i>
+            <span>Track Order in Profile</span>
+          </button>
+          <button onclick="app.closeModal('payment-portal-modal')" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 font-bold px-4 py-2.5 rounded-xl text-xs">
+            Continue Shopping
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal 4: User Authentication & Saved Credentials Modal -->
+  <div id="auth-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('auth-modal')" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Tabs: Login vs Register -->
+      <div class="flex border-b border-slate-200 dark:border-slate-800 mb-6 text-sm font-bold">
+        <button onclick="app.setAuthTab('login')" id="auth-tab-login" class="flex-1 pb-3 text-brand-600 border-b-2 border-brand-600">Sign In</button>
+        <button onclick="app.setAuthTab('register')" id="auth-tab-register" class="flex-1 pb-3 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">Create Account</button>
+      </div>
+
+      <!-- Quick 1-Click Saved Accounts Switcher (Demo users) -->
+      <div class="mb-5 p-3 rounded-2xl bg-brand-50/70 dark:bg-brand-950/40 border border-brand-100 dark:border-brand-900/50 space-y-2 text-xs">
+        <div class="flex items-center justify-between text-brand-700 dark:text-brand-300 font-bold">
+          <span class="flex items-center gap-1.5"><i data-lucide="key" class="w-3.5 h-3.5"></i> Saved 1-Click Credentials</span>
+          <span class="text-[10px] bg-brand-200 dark:bg-brand-900 text-brand-800 dark:text-brand-200 px-1.5 py-0.5 rounded font-mono">Ready</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="app.fillDemoUser('customer')" class="bg-white dark:bg-slate-800 hover:border-brand-500 border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-left transition-all">
+            <span class="block font-bold text-slate-800 dark:text-slate-100">Customer</span>
+            <span class="block text-[10px] text-slate-400 truncate">john@example.com</span>
+          </button>
+          <button onclick="app.fillDemoUser('admin')" class="bg-white dark:bg-slate-800 hover:border-brand-500 border border-slate-200 dark:border-slate-700 p-2 rounded-xl text-left transition-all">
+            <span class="block font-bold text-slate-800 dark:text-slate-100">Admin Portal</span>
+            <span class="block text-[10px] text-slate-400 truncate">admin@omnimart.com</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="app.handleLogin(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Email Address</label>
+          <input type="email" id="login-email" required placeholder="name@example.com" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-brand-500">
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="font-semibold text-slate-600 dark:text-slate-300">Password</label>
+            <span class="text-brand-600 hover:underline cursor-pointer" onclick="alert('Use password123 for demo customer, or admin123 for admin.')">Forgot?</span>
+          </div>
+          <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-1 focus:ring-brand-500">
+        </div>
+        
+        <!-- Persistent Saved Credentials Checkbox -->
+        <label class="flex items-center gap-2 cursor-pointer pt-1">
+          <input type="checkbox" id="login-remember" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+          <span class="text-slate-600 dark:text-slate-300 font-medium">Remember me & save credentials permanently</span>
+        </label>
+
+        <div id="login-error" class="hidden p-2.5 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600 text-xs"></div>
+
+        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-md shadow-brand-600/30 transition-all">
+          Sign In
+        </button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" onsubmit="app.handleRegister(event)" class="hidden space-y-3.5 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Full Name</label>
+          <input type="text" id="reg-name" required placeholder="Sarah Connor" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Email Address</label>
+          <input type="email" id="reg-email" required placeholder="sarah@example.com" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Password</label>
+          <input type="password" id="reg-password" required placeholder="Minimum 6 characters" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Shipping Address</label>
+          <input type="text" id="reg-address" placeholder="123 Ocean Drive, Miami, FL" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1 text-slate-600 dark:text-slate-300">Phone</label>
+          <input type="tel" id="reg-phone" placeholder="+1 (555) 019-2831" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+        </div>
+
+        <div id="register-error" class="hidden p-2.5 rounded-xl bg-red-50 dark:bg-red-950/50 text-red-600 text-xs"></div>
+
+        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-md shadow-brand-600/30 transition-all">
+          Create Account & Save
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Modal 5: User Profile & Order History Modal -->
+  <div id="profile-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('profile-modal')" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-4 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-purple-600 text-white flex items-center justify-center font-black text-xl shadow-lg">
+          <span id="profile-avatar-initial">J</span>
+        </div>
+        <div>
+          <h3 id="profile-name" class="text-xl font-bold text-slate-900 dark:text-white"></h3>
+          <p id="profile-email" class="text-xs text-slate-500"></p>
+          <div class="flex items-center gap-2 mt-1">
+            <span id="profile-role-badge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300"></span>
+            <span id="profile-address-preview" class="text-xs text-slate-400"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order History Section -->
+      <div class="space-y-4">
+        <h4 class="font-bold text-sm flex items-center gap-2">
+          <i data-lucide="clock" class="w-4 h-4 text-brand-600"></i> My Orders & Live Tracking
+        </h4>
+        <div id="profile-orders-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+        </div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+        <button onclick="app.logout()" class="text-xs text-red-600 font-bold hover:underline flex items-center gap-1.5">
+          <i data-lucide="log-out" class="w-4 h-4"></i> Sign Out
+        </button>
+        <button onclick="app.closeModal('profile-modal')" class="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold px-4 py-2 rounded-xl">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal 6: Wishlist Modal -->
+  <div id="wishlist-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('wishlist-modal')" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="mb-5">
+        <h3 class="text-xl font-bold flex items-center gap-2 text-red-500">
+          <i data-lucide="heart" class="w-5 h-5 fill-current"></i> Saved Wishlist Items
+        </h3>
+        <p class="text-xs text-slate-500">Items you've bookmarked for later shopping.</p>
+      </div>
+
+      <div id="wishlist-items-container" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: Admin Portal Dashboard ("All Access") -->
+  <div id="admin-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('admin-modal')" class="absolute top-5 right-5 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div>
+          <span class="text-[11px] font-extrabold uppercase tracking-widest text-brand-600">Merchant Center</span>
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            OmniMart Admin & Inventory Portal
+          </h3>
+        </div>
+        <button onclick="app.openNewProductModal()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Add New Product
+        </button>
+      </div>
+
+      <!-- Admin Overview Stats -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div class="text-xs text-slate-400 font-semibold">Total Revenue</div>
+          <div id="stat-revenue" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">$0.00</div>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div class="text-xs text-slate-400 font-semibold">Total Orders</div>
+          <div id="stat-orders" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</div>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div class="text-xs text-slate-400 font-semibold">Active Products</div>
+          <div id="stat-products" class="text-2xl font-black text-slate-900 dark:text-white mt-1">0</div>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div class="text-xs text-slate-400 font-semibold">Low Stock Alerts</div>
+          <div id="stat-low-stock" class="text-2xl font-black text-amber-500 mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- Admin Tabs: Manage Orders vs Manage Inventory -->
+      <div class="flex border-b border-slate-200 dark:border-slate-800 mb-4 text-xs font-bold space-x-4">
+        <button onclick="app.setAdminTab('orders')" id="admin-tab-orders" class="text-brand-600 border-b-2 border-brand-600 pb-2 flex items-center gap-1.5">
+          <i data-lucide="package-check" class="w-4 h-4"></i> Customer Orders Management
+        </button>
+        <button onclick="app.setAdminTab('products')" id="admin-tab-products" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 pb-2 flex items-center gap-1.5">
+          <i data-lucide="boxes" class="w-4 h-4"></i> Product Catalog & Stock
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Orders -->
+      <div id="admin-view-orders" class="overflow-x-auto max-h-96">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold uppercase">
+            <tr>
+              <th class="p-3">Order</th>
+              <th class="p-3">Customer</th>
+              <th class="p-3">Amount</th>
+              <th class="p-3">Payment</th>
+              <th class="p-3">Status</th>
+              <th class="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="admin-orders-tbody" class="divide-y divide-slate-100 dark:divide-slate-800">
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab Content 2: Products -->
+      <div id="admin-view-products" class="hidden overflow-x-auto max-h-96">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold uppercase">
+            <tr>
+              <th class="p-3">Item</th>
+              <th class="p-3">Category</th>
+              <th class="p-3">Price</th>
+              <th class="p-3">Stock</th>
+              <th class="p-3">Badge</th>
+              <th class="p-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-products-tbody" class="divide-y divide-slate-100 dark:divide-slate-800">
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal 8: Add / Edit Product Modal (Admin) -->
+  <div id="product-form-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 relative">
+      <button onclick="app.closeModal('product-form-modal')" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center justify-center">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <h3 id="product-form-title" class="text-xl font-bold mb-4">Add New Product</h3>
+      
+      <form onsubmit="app.handleSaveProduct(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="edit-prod-id">
+        <div>
+          <label class="block font-semibold mb-1">Product Title</label>
+          <input type="text" id="prod-title" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">Category</label>
+            <select id="prod-category" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+              <option value="Electronics">Electronics</option>
+              <option value="Fashion">Fashion</option>
+              <option value="Home & Living">Home & Living</option>
+              <option value="Beauty & Health">Beauty & Health</option>
+              <option value="Sports & Fitness">Sports & Fitness</option>
+              <option value="Books & Stationery">Books & Stationery</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Badge Tag</label>
+            <input type="text" id="prod-badge" placeholder="Best Seller, 20% OFF, New" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold mb-1">Price ($)</label>
+            <input type="number" step="0.01" id="prod-price" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Original Price ($)</label>
+            <input type="number" step="0.01" id="prod-original-price" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Stock Count</label>
+            <input type="number" id="prod-stock" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+          </div>
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Image URL</label>
+          <input type="url" id="prod-image" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1">Description</label>
+          <textarea id="prod-desc" rows="3" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl"></textarea>
+        </div>
+
+        <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-md">
+          Save Product to Store
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Printable Invoice Template (Rendered on Print) -->
+  <div id="printable-receipt-area" class="hidden">
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <!-- 6. Footer -->
+  <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-16 text-slate-500 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center text-white">
+              <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            </div>
+            <span class="text-base font-black text-slate-900 dark:text-white">OmniMart</span>
+          </div>
+          <p class="text-slate-400 text-xs leading-relaxed">
+            The next-generation universal marketplace connecting buyers and top curated products across electronics, fashion, home, and fitness.
+          </p>
+          <div class="flex items-center space-x-2 text-slate-400">
+            <span>PCI-DSS Compliant</span>
+            <span>•</span>
+            <span>256-Bit SSL Encrypted</span>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Shop Categories</h4>
+          <ul class="space-y-2 text-xs">
+            <li><a href="#catalog-section" onclick="app.selectCategory('Electronics')" class="hover:underline">Electronics & Gadgets</a></li>
+            <li><a href="#catalog-section" onclick="app.selectCategory('Fashion')" class="hover:underline">Fashion & Apparel</a></li>
+            <li><a href="#catalog-section" onclick="app.selectCategory('Home & Living')" class="hover:underline">Home, Kitchen & Decor</a></li>
+            <li><a href="#catalog-section" onclick="app.selectCategory('Beauty & Health')" class="hover:underline">Beauty & Skincare</a></li>
+            <li><a href="#catalog-section" onclick="app.selectCategory('Sports & Fitness')" class="hover:underline">Sports & Gym Gear</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">Customer Service</h4>
+          <ul class="space-y-2 text-xs">
+            <li><a href="#" onclick="app.openProfileModal(); return false;" class="hover:underline">Track Your Order</a></li>
+            <li><a href="#" onclick="alert('OmniMart offers a 30-day hassle-free money back guarantee on all products!'); return false;" class="hover:underline">Returns & Refunds</a></li>
+            <li><a href="#" onclick="alert('Free worldwide standard shipping on all orders over $100!'); return false;" class="hover:underline">Shipping Policies</a></li>
+            <li><a href="#" onclick="app.openAdminModal(); return false;" class="hover:underline">Seller & Admin Login</a></li>
+          </ul>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="font-bold text-slate-900 dark:text-white uppercase tracking-wider">Accepted Gateways</h4>
+          <div class="flex flex-wrap gap-2 text-[10px] font-bold">
+            <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700">VISA</span>
+            <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700">MASTERCARD</span>
+            <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700">AMEX</span>
+            <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700">UPI / QR</span>
+            <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700">PAYPAL</span>
+            <span class="bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded border border-slate-200 dark:border-slate-700">COD</span>
+          </div>
+          <p class="text-[11px] text-slate-400">All transactions are backed by banking encryption & 3D Secure protocol.</p>
+        </div>
+
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-400 gap-2">
+        <div>© 2026 OmniMart Global Inc. All rights reserved.</div>
+        <div class="flex space-x-4">
+          <a href="#" class="hover:underline">Privacy Policy</a>
+          <a href="#" class="hover:underline">Terms of Service</a>
+          <a href="#" class="hover:underline">Security</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Application Logic -->
+  <script src="/app.js"></script>
+</body>
+</html>
